@@ -57,7 +57,7 @@ RUN mkdir -p $ROS_WS/src && cd $ROS_WS/src/ \
 WORKDIR $ROS_WS
 RUN /bin/bash -c "source /opt/ros/humble/setup.bash && colcon build --symlink-install --parallel-workers 2"
 
-# Environment Configuration
+#Environment Configuration
 RUN echo 'source ~/turtlebot3_ws/install/setup.bash' >> ~/.bashrc \
     && echo 'export ROS_DOMAIN_ID=30 #TURTLEBOT3' >> ~/.bashrc \
     && echo 'source /usr/share/gazebo/setup.sh' >> ~/.bashrc \
@@ -91,7 +91,45 @@ RUN cd ~/ardupilot \
     && ./waf configure --board MatekF405-Wing \
     && ./waf copter
 
-    
+# Switch to root user for package installation
+USER root
+
+# Update package lists and install dependencies
+RUN apt-get update && apt-get install -y \
+    gstreamer1.0-plugins-bad gstreamer1.0-libav gstreamer1.0-gl \
+    libfuse2 \
+    libxcb-xinerama0 libxkbcommon-x11-0 libxcb-cursor-dev \
+    && if dpkg-query -W -f='${Status}' ModemManager 2>/dev/null | grep -q "installed"; then \
+           apt-get remove -y ModemManager; \
+       fi \
+    && rm -rf /var/lib/apt/lists/*
+
+# Add user to dialout group for serial port access
+RUN usermod -a -G dialout $USERNAME
+
+
+# Install FUSE
+USER root
+RUN apt-get update && apt-get install -y fuse libfuse2 && rm -rf /var/lib/apt/lists/*
+
+# Remove this line (because /dev/fuse is only available at runtime)
+# RUN chmod +x /dev/fuse && chown $USERNAME /dev/fuse
+
+USER $USERNAME
+
+
+
+
+
+# Download and install QGroundControl
+WORKDIR /home/$USERNAME
+RUN curl -L -o QGroundControl.AppImage https://d176tv9ibo4jno.cloudfront.net/latest/QGroundControl.AppImage \
+    && chmod +x QGroundControl.AppImage
+
+# Set environment variables to run QGroundControl
+RUN echo 'export DISPLAY=:1' >> ~/.bashrc
+
+USER $USERNAME
 
 # Copy the entrypoint and bashrc scripts
 COPY --chmod=755 entrypoint.sh /entrypoint.sh
@@ -101,4 +139,4 @@ RUN cat /home/${USERNAME}/bashrc_custom >> /home/${USERNAME}/.bashrc && rm /home
 # Set up entrypoint and default command
 ENTRYPOINT ["/bin/bash", "/entrypoint.sh"]
 CMD ["/bin/bash"]
-
+#CMD ["/home/ros/QGroundControl.AppImage"]
