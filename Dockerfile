@@ -63,6 +63,36 @@ RUN echo 'source ~/turtlebot3_ws/install/setup.bash' >> ~/.bashrc \
     && echo 'source /usr/share/gazebo/setup.sh' >> ~/.bashrc \
     && echo 'export TURTLEBOT3_MODEL=burger' >> ~/.bashrc
 
+
+# Install ArduPilot
+ENV ARDUPILOT_DIR=/home/$USERNAME/ardupilot
+RUN git clone https://github.com/ArduPilot/ardupilot.git $ARDUPILOT_DIR \
+    && cd $ARDUPILOT_DIR \
+    && git submodule update --init --recursive
+
+RUN /bin/bash -c "cd $ARDUPILOT_DIR && USER=$USERNAME Tools/environment_install/install-prereqs-ubuntu.sh -y"
+
+
+# Install the arm-none-eabi toolchain (moved before switching to non-root user)
+USER root
+RUN apt-get update && apt-get install -y gcc-arm-none-eabi && rm -rf /var/lib/apt/lists/*
+USER $USERNAME
+
+# # Reload the path
+#RUN echo "source ~/.profile" >> ~/.bashrc
+
+RUN echo 'export PATH=/opt/gcc-arm-none-eabi-10-2020-q4-major/bin:$PATH' >> ~/.bashrc \
+    && echo 'export PATH=/home/ros/ardupilot/Tools/autotest:$PATH' >> ~/.bashrc \
+    && echo 'export PATH=/usr/lib/ccache:$PATH' >> ~/.bashrc
+
+
+RUN cd ~/ardupilot \
+    && ./waf distclean \
+    && ./waf configure --board MatekF405-Wing \
+    && ./waf copter
+
+    
+
 # Copy the entrypoint and bashrc scripts
 COPY --chmod=755 entrypoint.sh /entrypoint.sh
 COPY bashrc /home/${USERNAME}/bashrc_custom
