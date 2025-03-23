@@ -26,4 +26,7 @@ sim_vehicle.py -v copter --console --map -w
 cd ~/ardupilot/ArduCopter
 ../Tools/autotest/sim_vehicle.py --map --console
 
+#open another commandline
+docker exec -it $(docker ps -q --filter "ancestor=caixinha") /bin/bash
+
 
