@@ -138,6 +138,37 @@ RUN echo 'export PATH=$HOME/.local/bin:$PATH' >> ~/.bashrc
 #####
 RUN cd $ARDUPILOT_DIR/ArduCopter && echo 'cd $ARDUPILOT_DIR/ArduCopter' >> /home/${USERNAME}/.bashrc
 
+
+
+RUN mkdir -p ~/ros2_ws/src \
+    && cd ~/ros2_ws
+
+RUN mkdir -p ~/ardu_ws/src \
+    && cd ~/ardu_ws \
+    && vcs import --recursive --input https://raw.githubusercontent.com/ArduPilot/ardupilot/master/Tools/ros2/ros2.repos src \
+    && sudo apt update \
+    && rosdep update \
+    && /bin/bash -c "source /opt/ros/humble/setup.bash && rosdep install --from-paths src --ignore-src -r -y"
+
+# Install default-jre
+USER root
+RUN apt-get update && apt-get install -y default-jre && rm -rf /var/lib/apt/lists/*
+USER $USERNAME
+
+# Clone and build Micro-XRCE-DDS-Gen
+RUN cd ~/ardu_ws \
+    && git clone --recurse-submodules https://github.com/ardupilot/Micro-XRCE-DDS-Gen.git \
+    && cd Micro-XRCE-DDS-Gen \
+    && ./gradlew assemble \
+    && echo "export PATH=\$PATH:$PWD/scripts" >> ~/.bashrc
+    #&& echo "export PATH=\$PATH:$PWD/build/install/Micro-XRCE-DDS-Gen/bin" >> ~/.bashrc
+
+RUN cd ~/ardu_ws \
+    && /bin/bash -c "source /opt/ros/humble/setup.bash && colcon build --packages-up-to ardupilot_dds_tests --event-handlers=console_cohesion+"
+
+
+
+
 # Copy the entrypoint and bashrc scripts
 COPY --chmod=755 entrypoint.sh /entrypoint.sh
 COPY bashrc /home/${USERNAME}/bashrc_custom
