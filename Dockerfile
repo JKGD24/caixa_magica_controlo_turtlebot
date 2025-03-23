@@ -135,7 +135,7 @@ USER $USERNAME
 # Install pymavlink and MAVProxy
 RUN /bin/bash -c "pip install --upgrade pymavlink MAVProxy --user"
 
-
+#####
 
 # Copy the entrypoint and bashrc scripts
 COPY --chmod=755 entrypoint.sh /entrypoint.sh
