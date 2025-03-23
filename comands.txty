@@ -10,3 +10,20 @@ docker run -it --rm --runtime=runc --interactive     --env=DISPLAY=$DISPLAY     
 
 ./QGroundControl.AppImage --appimage-extract
 ./squashfs-root/QGroundControl
+
+
+sudo docker build --network=host -t caixinha .
+
+sim_vehicle.py -v ArduCopter --console --map -w
+
+cd ardupilot/ArduCopter
+sim_vehicle.py --console --map -w
+
+
+sim_vehicle.py -v copter --console --map -w
+
+
+cd ~/ardupilot/ArduCopter
+../Tools/autotest/sim_vehicle.py --map --console
+
+

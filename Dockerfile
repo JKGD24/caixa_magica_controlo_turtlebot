@@ -133,9 +133,10 @@ USER $USERNAME
 
 
 # Install pymavlink and MAVProxy
-RUN /bin/bash -c "pip install --upgrade pymavlink MAVProxy --user"
-
+#RUN /bin/bash -c "pip install --upgrade pymavlink MAVProxy --user"
+RUN echo 'export PATH=$HOME/.local/bin:$PATH' >> ~/.bashrc
 #####
+RUN cd $ARDUPILOT_DIR/ArduCopter && echo 'cd $ARDUPILOT_DIR/ArduCopter' >> /home/${USERNAME}/.bashrc
 
 # Copy the entrypoint and bashrc scripts
 COPY --chmod=755 entrypoint.sh /entrypoint.sh
