@@ -51,7 +51,7 @@ RUN /bin/bash -c "source /opt/ros/humble/setup.bash && colcon build --symlink-in
 # Environment Configuration
 RUN echo 'source ~/turtlebot3_ws/install/setup.bash' >> ~/.bashrc \
     && echo 'export ROS_DOMAIN_ID=30 #TURTLEBOT3' >> ~/.bashrc \
-    && echo 'source /usr/share/gazebo/setup.sh' >> ~/.bashrc \
+    && echo 'if [ -f /usr/share/gazebo/setup.sh ]; then source /usr/share/gazebo/setup.sh; fi' >> ~/.bashrc \
     && echo 'export TURTLEBOT3_MODEL=burger' >> ~/.bashrc
 
 # Install ArduPilot
@@ -91,9 +91,12 @@ RUN mkdir -p ~/ardu_ws/src \
     && vcs import --recursive --input https://raw.githubusercontent.com/ArduPilot/ardupilot/master/Tools/ros2/ros2.repos src \
     && sudo apt update \
     && rosdep update \
-    && /bin/bash -c "source /opt/ros/humble/setup.bash && rosdep install --from-paths src --ignore-src -r -y"
+    && /bin/bash -c "source /opt/ros/humble/setup.bash && rosdep install --from-paths src --ignore-src -r -y" 
+
 
 RUN /bin/bash -c "source /opt/ros/humble/setup.bash && colcon build --packages-skip ardupilot_dds_tests ardupilot_msgs ardupilot_sitl"
+
+RUN colcon build --packages-up-to ardupilot_dds_tests || true
 
 # Clone and build Micro-XRCE-DDS-Gen
 RUN cd ~/ardu_ws \
@@ -102,6 +105,15 @@ RUN cd ~/ardu_ws \
     && ./gradlew assemble \
     && echo "export PATH=\$PATH:$PWD/scripts" >> ~/.bashrc
 
+# Install necessary tools for Gazebo Harmonic
+RUN sudo apt-get update && sudo apt-get install -y curl lsb-release gnupg \
+    && sudo curl https://packages.osrfoundation.org/gazebo.gpg --output /usr/share/keyrings/pkgs-osrf-archive-keyring.gpg \
+    && echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/pkgs-osrf-archive-keyring.gpg] http://packages.osrfoundation.org/gazebo/ubuntu-stable $(lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/gazebo-stable.list \
+    && sudo apt-get update && sudo apt-get install -y gz-harmonic gazebo-common \
+    && sudo rm -rf /var/lib/apt/lists/*
+
+
+    
 # Copy the entrypoint and bashrc scripts
 COPY --chmod=755 entrypoint.sh /entrypoint.sh
 COPY bashrc /home/${USERNAME}/bashrc_custom

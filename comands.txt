@@ -30,3 +30,7 @@ cd ~/ardupilot/ArduCopter
 docker exec -it $(docker ps -q --filter "ancestor=caixinha") /bin/bash
 
 
+
+
+
+
