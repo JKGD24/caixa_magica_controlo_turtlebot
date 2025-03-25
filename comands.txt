@@ -30,6 +30,7 @@ cd ~/ardupilot/ArduCopter
 docker exec -it $(docker ps -q --filter "ancestor=caixinha") /bin/bash
 
 
+docker run -it --runtime=runc --interactive     --env=DISPLAY=$DISPLAY     --env=QT_X11_NO_MITSHM=1     --volume=/tmp/.X11-unix:/tmp/.X11-unix:rw     --volume=$HOME/.ssh:/home/ros/.ssh     caixinha
 
 
 

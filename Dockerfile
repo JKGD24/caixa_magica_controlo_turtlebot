@@ -112,8 +112,39 @@ RUN sudo apt-get update && sudo apt-get install -y curl lsb-release gnupg \
     && sudo apt-get update && sudo apt-get install -y gz-harmonic gazebo-common \
     && sudo rm -rf /var/lib/apt/lists/*
 
-
+RUN cd ~/ardu_ws \
+    && vcs import --input https://raw.githubusercontent.com/ArduPilot/ardupilot_gz/main/ros2_gz.repos --recursive src
     
+
+# Set the Gazebo version to harmonic
+RUN echo 'export GZ_VERSION=harmonic' >> ~/.bashrc
+
+# Add Gazebo APT sources
+RUN sudo apt-get update && sudo apt-get install -y wget \
+    && sudo wget https://packages.osrfoundation.org/gazebo.gpg -O /usr/share/keyrings/pkgs-osrf-archive-keyring.gpg \
+    && echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/pkgs-osrf-archive-keyring.gpg] http://packages.osrfoundation.org/gazebo/ubuntu-stable $(lsb_release -cs) main" \
+    | sudo tee /etc/apt/sources.list.d/gazebo-stable.list \
+    && sudo apt-get update
+
+# Add Gazebo sources to rosdep for the non-default pairing of ROS 2 Humble and Gazebo Harmonic
+RUN sudo wget https://raw.githubusercontent.com/osrf/osrf-rosdep/master/gz/00-gazebo.list \
+    -O /etc/ros/rosdep/sources.list.d/00-gazebo.list \
+    && rosdep update
+
+# Install dependencies for the workspace
+RUN cd ~/ardu_ws \
+    && /bin/bash -c "source /opt/ros/humble/setup.bash && sudo apt update && rosdep update && rosdep install --from-paths src --ignore-src -y"
+
+RUN cd ~/ardu_ws/src \
+    && git clone https://github.com/ArduPilot/ardupilot_ros.git
+    
+RUN cd ~/ardu_ws \
+    && /bin/bash -c "source /opt/ros/humble/setup.bash && rosdep install --from-paths src --ignore-src -r --skip-keys gazebo-ros-pkgs"
+
+RUN cd ~/ardu_ws \
+    && /bin/bash -c "source ./install/setup.bash && colcon build --packages-up-to ardupilot_ros ardupilot_gz_bringup || true"
+
+
 # Copy the entrypoint and bashrc scripts
 COPY --chmod=755 entrypoint.sh /entrypoint.sh
 COPY bashrc /home/${USERNAME}/bashrc_custom
