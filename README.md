@@ -45,7 +45,7 @@ newgrp docker
 
 ### 1. Clone the Repository
 ```bash
-git clone https://github.com/yourusername/caixinha.git
+git clone https://github.com/SamuelTeixeira1/caixinha.git
 cd caixinha
 ```
 
