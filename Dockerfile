@@ -7,9 +7,9 @@ FROM osrf/ros:humble-desktop
 # Update and install necessary packages
 RUN apt-get update && apt-get install -y \
     nano vim git curl lsb-release gnupg sudo python3-colcon-common-extensions \
-    ros-humble-gazebo-* \
-    ros-humble-cartographer ros-humble-cartographer-ros \
-    ros-humble-navigation2 ros-humble-nav2-bringup \
+    # ros-humble-gazebo-* \
+    # ros-humble-cartographer ros-humble-cartographer-ros \
+    # ros-humble-navigation2 ros-humble-nav2-bringup \
     x11-apps mesa-utils gstreamer1.0-plugins-bad gstreamer1.0-libav gstreamer1.0-gl \
     libfuse2 libxcb-xinerama0 libxkbcommon-x11-0 libxcb-cursor-dev \
     gcc-arm-none-eabi default-jre gitk git-gui \
@@ -37,22 +37,22 @@ RUN usermod -a -G dialout $USERNAME
 USER $USERNAME
 WORKDIR /home/$USERNAME
 
-# Install TurtleBot3 Packages
-ENV ROS_WS=/home/$USERNAME/turtlebot3_ws
-RUN mkdir -p $ROS_WS/src && cd $ROS_WS/src/ \
-    && git clone -b humble-devel https://github.com/ROBOTIS-GIT/DynamixelSDK.git \
-    && git clone -b humble-devel https://github.com/ROBOTIS-GIT/turtlebot3_msgs.git \
-    && git clone -b humble-devel https://github.com/ROBOTIS-GIT/turtlebot3.git \
-    && git clone -b humble-devel https://github.com/ROBOTIS-GIT/turtlebot3_simulations.git
+# # Install TurtleBot3 Packages
+# ENV ROS_WS=/home/$USERNAME/turtlebot3_ws
+# RUN mkdir -p $ROS_WS/src && cd $ROS_WS/src/ \
+#     && git clone -b humble-devel https://github.com/ROBOTIS-GIT/DynamixelSDK.git \
+#     && git clone -b humble-devel https://github.com/ROBOTIS-GIT/turtlebot3_msgs.git \
+#     && git clone -b humble-devel https://github.com/ROBOTIS-GIT/turtlebot3.git \
+#     && git clone -b humble-devel https://github.com/ROBOTIS-GIT/turtlebot3_simulations.git
 
-WORKDIR $ROS_WS
-RUN /bin/bash -c "source /opt/ros/humble/setup.bash && colcon build --symlink-install --parallel-workers 2"
+# WORKDIR $ROS_WS
+# RUN /bin/bash -c "source /opt/ros/humble/setup.bash && colcon build --symlink-install --parallel-workers 2"
 
-# Environment Configuration
-RUN echo 'source ~/turtlebot3_ws/install/setup.bash' >> ~/.bashrc \
-    && echo 'export ROS_DOMAIN_ID=30 #TURTLEBOT3' >> ~/.bashrc \
-    && echo 'if [ -f /usr/share/gazebo/setup.sh ]; then source /usr/share/gazebo/setup.sh; fi' >> ~/.bashrc \
-    && echo 'export TURTLEBOT3_MODEL=burger' >> ~/.bashrc
+# # Environment Configuration
+# RUN echo 'source ~/turtlebot3_ws/install/setup.bash' >> ~/.bashrc \
+#     && echo 'export ROS_DOMAIN_ID=30 #TURTLEBOT3' >> ~/.bashrc \
+#     && echo 'if [ -f /usr/share/gazebo/setup.sh ]; then source /usr/share/gazebo/setup.sh; fi' >> ~/.bashrc \
+#     && echo 'export TURTLEBOT3_MODEL=burger' >> ~/.bashrc
 
 # Install ArduPilot
 ENV ARDUPILOT_DIR=/home/$USERNAME/ardupilot
@@ -72,6 +72,12 @@ RUN cd ~/ardupilot \
     && ./waf distclean \
     && ./waf configure --board MatekF405-Wing \
     && ./waf copter
+
+USER root
+RUN apt-get update && apt-get install -y fuse libfuse2 && rm -rf /var/lib/apt/lists/*
+#RUN apt-get update && apt-get install -y fuse
+
+USER $USERNAME
 
 # Download and install QGroundControl
 WORKDIR /home/$USERNAME
@@ -94,9 +100,9 @@ RUN mkdir -p ~/ardu_ws/src \
     && /bin/bash -c "source /opt/ros/humble/setup.bash && rosdep install --from-paths src --ignore-src -r -y" 
 
 
-RUN /bin/bash -c "source /opt/ros/humble/setup.bash && colcon build --packages-skip ardupilot_dds_tests ardupilot_msgs ardupilot_sitl"
+RUN /bin/bash -c "source /opt/ros/humble/setup.bash && colcon build --packages-skip ardupilot_dds_tests ardupilot_msgs ardupilot_sitl --parallel-workers 8"
 
-RUN colcon build --packages-up-to ardupilot_dds_tests || true
+RUN colcon build --packages-up-to ardupilot_dds_tests --parallel-workers 8 || true
 
 # Clone and build Micro-XRCE-DDS-Gen
 RUN cd ~/ardu_ws \
@@ -105,6 +111,7 @@ RUN cd ~/ardu_ws \
     && ./gradlew assemble \
     && echo "export PATH=\$PATH:$PWD/scripts" >> ~/.bashrc
 
+    # gazebo classic
 # Install necessary tools for Gazebo Harmonic
 RUN sudo apt-get update && sudo apt-get install -y curl lsb-release gnupg \
     && sudo curl https://packages.osrfoundation.org/gazebo.gpg --output /usr/share/keyrings/pkgs-osrf-archive-keyring.gpg \
@@ -112,12 +119,22 @@ RUN sudo apt-get update && sudo apt-get install -y curl lsb-release gnupg \
     && sudo apt-get update && sudo apt-get install -y gz-harmonic gazebo-common \
     && sudo rm -rf /var/lib/apt/lists/*
 
+     # gazebo garden
+    # Install necessary tools for Gazebo Garden
+# RUN apt-get update && apt-get install -y lsb-release curl gnupg \
+#     && curl https://packages.osrfoundation.org/gazebo.gpg --output /usr/share/keyrings/pkgs-osrf-archive-keyring.gpg \
+#     && echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/pkgs-osrf-archive-keyring.gpg] http://packages.osrfoundation.org/gazebo/ubuntu-stable $(lsb_release -cs) main" > /etc/apt/sources.list.d/gazebo-stable.list \
+#     && apt-get update && apt-get install -y gz-garden \
+#     && rm -rf /var/lib/apt/lists/*
+
+# Set the Gazebo version to harmonic
+RUN echo 'export GZ_VERSION=harmonic' >> ~/.bashrc
+
+
 RUN cd ~/ardu_ws \
     && vcs import --input https://raw.githubusercontent.com/ArduPilot/ardupilot_gz/main/ros2_gz.repos --recursive src
     
 
-# Set the Gazebo version to harmonic
-RUN echo 'export GZ_VERSION=harmonic' >> ~/.bashrc
 
 ## repeated from above
 # Add Gazebo APT sources
@@ -128,22 +145,23 @@ RUN echo 'export GZ_VERSION=harmonic' >> ~/.bashrc
 #     && sudo apt-get update
 
 # Add Gazebo sources to rosdep for the non-default pairing of ROS 2 Humble and Gazebo Harmonic
+
 RUN sudo wget https://raw.githubusercontent.com/osrf/osrf-rosdep/master/gz/00-gazebo.list \
     -O /etc/ros/rosdep/sources.list.d/00-gazebo.list \
     && rosdep update
 
 # Install dependencies for the workspace
-RUN cd ~/ardu_ws \
+RUN cd /home/$USERNAME/ardu_ws \
     && /bin/bash -c "source /opt/ros/humble/setup.bash && sudo apt update && rosdep update && rosdep install --from-paths src --ignore-src -y"
 
 RUN cd ~/ardu_ws/src \
     && git clone https://github.com/ArduPilot/ardupilot_ros.git
     
 RUN cd ~/ardu_ws \
-    && /bin/bash -c "source /opt/ros/humble/setup.bash && rosdep install --from-paths src --ignore-src -r --skip-keys gazebo-ros-pkgs"
+    && /bin/bash -c "source /opt/ros/humble/setup.bash && rosdep install --from-paths src --ignore-src -y"
 
 RUN cd ~/ardu_ws \
-    && /bin/bash -c "source ./install/setup.bash && colcon build --packages-up-to ardupilot_ros ardupilot_gz_bringup || true"
+    && /bin/bash -c "source ./install/setup.bash && colcon build --packages-up-to ardupilot_ros ardupilot_gz_bringup --parallel-workers 8 || true"
 
 
 # Copy the entrypoint and bashrc scripts
@@ -154,3 +172,4 @@ RUN cat /home/${USERNAME}/bashrc_custom >> /home/${USERNAME}/.bashrc && rm /home
 # Set up entrypoint and default command
 ENTRYPOINT ["/bin/bash", "/entrypoint.sh"]
 CMD ["/bin/bash"]
+#CMD ["/home/ros/QGroundControl.AppImage"]

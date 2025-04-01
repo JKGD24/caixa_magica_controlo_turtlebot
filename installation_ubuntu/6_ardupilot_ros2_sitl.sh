@@ -74,7 +74,7 @@ echo "🎉 ArduPilot ROS 2 SITL installation complete!"
 
 source /opt/ros/humble/setup.bash
 cd ~/ardu_ws/
-colcon build --packages-up-to ardupilot_sitl || true
+colcon build --packages-up-to ardupilot_sitl --allow-overriding ardupilot_msgs ardupilot_sitl|| true
 source install/setup.bash
 
 

@@ -26,6 +26,8 @@ source ~/.profile
 
 # Install pymavlink and mavproxy
 sudo pip install pymavlink mavproxy
+sudo rm -rf /var/lib/docker
+sudo rm -rf /var/lib/containerd
 
 echo "Setup complete. Log out and log back in to finalize the environment setup."
 echo "You can now build ArduPilot using waf. Example for MatekH743 board:"
