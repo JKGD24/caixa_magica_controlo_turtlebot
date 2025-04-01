@@ -33,7 +33,7 @@ newgrp docker
 
 #### Windows
 
-1. Download and install **Docker Desktop** from [Docker's official website](https://www.docker.com/products/docker-desktop/).
+1. Download and install **Docker Desktop** from [Docker's official website](https://www.docker.com/products/docker-desktop/) (https://docs.docker.com/desktop/setup/install/windows-install/).
 2. Enable **WSL 2 Backend** (recommended) during installation.
 3. Restart your system after installation.
 4. Open PowerShell and verify installation:
