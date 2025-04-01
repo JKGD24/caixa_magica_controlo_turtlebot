@@ -61,6 +61,7 @@ docker run -it --rm --runtime=runc \
     --env=QT_X11_NO_MITSHM=1 \
     --volume=/tmp/.X11-unix:/tmp/.X11-unix:rw \
     --volume=$HOME/.ssh:/home/ros/.ssh \
+    --name=caixinha_container
     caixinha
 ```
 
@@ -71,6 +72,7 @@ docker run -dit --name caixinha \
     --env=QT_X11_NO_MITSHM=1 \
     --volume=/tmp/.X11-unix:/tmp/.X11-unix:rw \
     --volume=$HOME/.ssh:/home/ros/.ssh \
+    --name=caixinha_container
     caixinha
 ```
 
