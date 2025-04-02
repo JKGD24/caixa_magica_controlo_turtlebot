@@ -104,6 +104,13 @@ To enter an already running container:
 ```bash
 docker exec -it caixinha /bin/bash
 ```
+# Run ROS 2 ArduPilot Tests
+cd ~/ardu_ws/
+colcon test --packages-select ardupilot_dds_tests
+
+# Build ROS 2 Packages
+colcon build --packages-up-to ardupilot_sitl
+colcon build --packages-up-to ardupilot_gz_bringup
 
 ## Testing the Setup
 
