@@ -31,15 +31,19 @@ sudo usermod -aG docker $USER
 newgrp docker
 ```
 
-#### Windows
+#### Windows Setup
 
-1. Download and install **Docker Desktop** from [Docker's official website](https://www.docker.com/products/docker-desktop/) (https://docs.docker.com/desktop/setup/install/windows-install/).
-2. Enable **WSL 2 Backend** (recommended) during installation.
-3. Restart your system after installation.
-4. Open PowerShell and verify installation:
+1. **Download and Install Docker Desktop**  
+   - Get **Docker Desktop** from [Docker’s official website](https://www.docker.com/products/docker-desktop/).  
+   - Follow the installation guide: [Windows Install Guide](https://docs.docker.com/desktop/setup/install/windows-install/).  
+   - During installation, enable **WSL 2 Backend** (recommended).  
+
+2. **Verify Docker Installation**  
+   Open **PowerShell** and run:  
    ```powershell
    docker --version
-   ```
+
+
 
 ## Getting Started
 
