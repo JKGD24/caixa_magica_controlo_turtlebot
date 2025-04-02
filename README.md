@@ -31,7 +31,7 @@ sudo usermod -aG docker $USER
 newgrp docker
 ```
 
-#### Windows Setup
+### Windows Setup
 
 1. **Download and Install Docker Desktop**  
    - Get **Docker Desktop** from [Docker’s official website](https://www.docker.com/products/docker-desktop/).  
@@ -42,7 +42,27 @@ newgrp docker
    Open **PowerShell** and run:  
    ```powershell
    docker --version
+   ```  
+   If Docker is installed correctly, this command will display the installed version.  
 
+3. **Enable WSL Integration for Docker**  
+   - Open **Docker Desktop** on Windows.  
+   - Go to **Settings** ⚙️ (click the gear icon).  
+   - Navigate to **Resources > WSL Integration**.  
+   - Find your **Ubuntu** distribution and toggle it **ON**.  
+   - Click **Apply & Restart**.  
+
+4. **Launch WSL and Verify Docker**  
+   Open **PowerShell** and start Ubuntu in WSL:  
+   ```powershell
+   wsl -d Ubuntu
+   ```  
+   Once inside WSL, confirm that Docker is accessible:  
+   ```sh
+   docker --version
+   ```  
+
+Now you’re ready to use Docker inside WSL! 🚀
 
 
 ## Getting Started
