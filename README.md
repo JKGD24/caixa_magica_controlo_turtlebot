@@ -70,14 +70,24 @@ newgrp docker
 
 ## Getting Started
 
-### 1. Clone the Repository
+### Option 1: Pull Pre-Built Docker Image
+
+If you want to skip building the image manually, you can pull the latest pre-built image from Docker Hub:
+
+```bash
+docker pull samuelteixeira1/caixinha:latest
+```
+
+### Option 2: Build the Image Manually
+
+#### 1. Clone the Repository
 
 ```bash
 git clone https://github.com/SamuelTeixeira1/caixinha.git
 cd caixinha
 ```
 
-### 2. Build the Docker Image
+#### 2. Build the Docker Image
 
 ```bash
 docker build --network=host -t caixinha .
