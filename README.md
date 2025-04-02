@@ -169,6 +169,7 @@ sim_vehicle.py -v ArduCopter --console --map -w
 ### Run Gazebo Simulation
 
 ```bash
+cd ~/ardu_ws/
 source install/setup.bash
 ros2 launch ardupilot_gz_bringup iris_runway.launch.py
 ```
