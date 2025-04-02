@@ -78,6 +78,18 @@ If you want to skip building the image manually, you can pull the latest pre-bui
 docker pull samuelteixeira1/caixinha:latest
 ```
 
+To run the container:
+
+```bash
+docker run -it --runtime=runc \
+    --interactive --env=DISPLAY=$DISPLAY \
+    --env=QT_X11_NO_MITSHM=1 \
+    --volume=/tmp/.X11-unix:/tmp/.X11-unix:rw \
+    --volume=$HOME/.ssh:/home/ros/.ssh \
+    --name=caixinha_container \
+    samuelteixeira1/caixinha:latest
+```
+
 ### Option 2: Build the Image Manually
 
 #### 1. Clone the Repository
@@ -105,18 +117,6 @@ docker run -it --runtime=runc \
     caixinha
 ```
 
-To start a container in the background and reattach later:
-
-```bash
-docker run -dit --name caixinha \
-    --runtime=runc --env=DISPLAY=$DISPLAY \
-    --env=QT_X11_NO_MITSHM=1 \
-    --volume=/tmp/.X11-unix:/tmp/.X11-unix:rw \
-    --volume=$HOME/.ssh:/home/ros/.ssh \
-    --name=caixinha_container \
-    caixinha
-```
-
 On Windows, add this:
 
 ```bash
@@ -126,7 +126,7 @@ export DISPLAY=:0
 To enter an already running container:
 
 ```bash
-docker exec -it caixinha /bin/bash
+docker exec -it caixinha_container /bin/bash
 ```
 
 ## Run ROS 2 ArduPilot Tests
@@ -170,6 +170,7 @@ sim_vehicle.py -v ArduCopter --console --map -w
 ### Run Gazebo Simulation
 
 ```bash
+cd ~/ardu_ws/
 source install/setup.bash
 ros2 launch ardupilot_gz_bringup iris_runway.launch.py
 ```
