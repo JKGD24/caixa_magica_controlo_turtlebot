@@ -37,6 +37,9 @@ docker run -dit --name caixinha_container \
 # Attach to Running Container
 docker exec -it caixinha_container /bin/bash
 
+# Start the Container
+docker start caixinha_container
+
 # Stop and Remove the Running Container
 docker stop caixinha_container && docker rm caixinha_container
 

@@ -139,6 +139,7 @@ colcon test --packages-select ardupilot_dds_tests
 ## Build ROS 2 Packages
 
 ```bash
+cd ~/ardu_ws
 colcon build --packages-up-to ardupilot_sitl
 colcon build --packages-up-to ardupilot_gz_bringup
 ```
@@ -177,8 +178,10 @@ ros2 launch ardupilot_gz_bringup iris_runway.launch.py
 
 ```bash
 cd ~
+```bash
+# Run QGroundControl directly from the AppImage
 ./QGroundControl.AppImage
-
+```
 # Extract QGroundControl AppImage
 ./QGroundControl.AppImage --appimage-extract
 ./squashfs-root/QGroundControl
