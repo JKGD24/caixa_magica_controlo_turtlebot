@@ -86,7 +86,7 @@ docker build --network=host -t caixinha .
 ### 3. Run the Container
 
 ```bash
-docker run -it --rm --runtime=runc \
+docker run -it --runtime=runc \
     --interactive --env=DISPLAY=$DISPLAY \
     --env=QT_X11_NO_MITSHM=1 \
     --volume=/tmp/.X11-unix:/tmp/.X11-unix:rw \
@@ -103,6 +103,7 @@ docker run -dit --name caixinha \
     --env=QT_X11_NO_MITSHM=1 \
     --volume=/tmp/.X11-unix:/tmp/.X11-unix:rw \
     --volume=$HOME/.ssh:/home/ros/.ssh \
+    --name=caixinha_container \
     caixinha
 ```
 
