@@ -11,26 +11,93 @@ Before using this setup, ensure that you have the following installed on your sy
 
 ### Install Docker
 
-#### Linux (Tested on Ubuntu 22.04)
+#### Linux (Tested on Ubuntu 22.04) (recommended)
 
+
+Add Docker's official GPG key:
 ```bash
-sudo apt update
-sudo apt install -y ca-certificates curl gnupg
-sudo install -m 0755 -d /etc/apt/keyrings
-curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo tee /etc/apt/keyrings/docker.gpg > /dev/null
-sudo chmod a+r /etc/apt/keyrings/docker.gpg
-echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
-sudo apt update
-sudo apt install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+   sudo apt-get update
+   sudo apt-get install ca-certificates curl
+   sudo install -m 0755 -d /etc/apt/keyrings
+   sudo curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc
+   sudo chmod a+r /etc/apt/keyrings/docker.asc
 ```
 
-To enable Docker without `sudo` (optional):
+Add the repository to Apt sources:
 
 ```bash
-sudo groupadd docker
-sudo usermod -aG docker $USER
-newgrp docker
+   echo \
+      "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu \
+      $(. /etc/os-release && echo "${UBUNTU_CODENAME:-$VERSION_CODENAME}") stable" | \
+      sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+   sudo apt-get update
 ```
+
+Install Docker and its plugins:
+
+```bash
+   sudo apt-get install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+```
+
+To enable Docker without `sudo`:
+
+```bash
+   sudo groupadd docker
+   sudo usermod -aG docker $USER
+   newgrp docker
+```
+Configure the Atlas Docker Container:
+
+```bash
+   echo -e "PUID=$(id -u)\nPGID=$(id -g)\nTZ=Europe/Lisbon" > .env
+```
+
+If no `.env` file is created, check permissions, create the file manually and then run it again.
+
+In the docker compose file, change/add the volumes mounted. On the left, put the host machine's directory. On the right, the directory you want the volume to be inside the docker container.
+
+```yaml
+   services:
+   atlas:
+      image: samuelteixeira1/caixinha:latest
+      container_name: atlas
+      restart: unless-stopped
+      volumes:
+         - /home/dinis/Desktop/Universidade/Nucleos/ATLAS/:/home/ros/atlas
+      environment:
+         - PUID=${PUID}
+         - PGID=${PGID}
+         - TZ=${TZ}
+      stdin_open: true
+      tty: true 
+```
+
+In this case, the host's folder on `/home/dinis/Desktop/Universidade/Nucleos/ATLAS/` is mounted to `/home/ros/atlas`.
+
+Now that the docker container is configured, it's time to build it.
+
+```bash
+   docker compose up -d
+```
+
+Make sure you are on the same folder where the `compose.yaml` file is. The first time you run it, it will take a while pulling the image. All other times should be almost instantaneous.
+
+Now the container should be up and running. To enter and execute commands in it, use:
+
+```bash
+   docker exec -it atlas bash  
+```
+
+When your work is done, do the following.
+
+```bash
+   exit
+   docker compose down  
+```
+
+
+**WARNING: STORE ALL THE DATA INSIDE THE MOUNTED VOLUMES, OTHERWISE IT WILL BE ERASED. IF YOU DON'T WANT TO BE CAREFUL, JUST STOP INSTEAD OF DOWNING THE CONTAINER. JUST BE WARNED IT WILL BE CONSUMING RESOURCES IN THE BACKGROUND.**
+
 
 ### Windows Setup
 

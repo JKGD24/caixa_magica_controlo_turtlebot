@@ -1,0 +1,13 @@
+services:
+  atlas:
+    image: samuelteixeira1/caixinha:latest
+    container_name: atlas
+    restart: unless-stopped
+    volumes:
+      - /home/dinis/Desktop/Universidade/Nucleos/ATLAS/:/home/ros/atlas
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+    stdin_open: true # docker run -i
+    tty: true 
