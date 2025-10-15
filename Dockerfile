@@ -7,9 +7,9 @@ FROM osrf/ros:humble-desktop
 # Update and install necessary packages
 RUN apt-get update && apt-get install -y \
     nano vim git curl lsb-release gnupg sudo python3-colcon-common-extensions \
-    # ros-humble-gazebo-* \
-    # ros-humble-cartographer ros-humble-cartographer-ros \
-    # ros-humble-navigation2 ros-humble-nav2-bringup \
+    ros-humble-gazebo-* \
+    ros-humble-cartographer ros-humble-cartographer-ros \
+    ros-humble-navigation2 ros-humble-nav2-bringup \
     x11-apps mesa-utils gstreamer1.0-plugins-bad gstreamer1.0-libav gstreamer1.0-gl \
     libfuse2 libxcb-xinerama0 libxkbcommon-x11-0 libxcb-cursor-dev \
     gcc-arm-none-eabi default-jre gitk git-gui \
@@ -37,22 +37,22 @@ RUN usermod -a -G dialout $USERNAME
 USER $USERNAME
 WORKDIR /home/$USERNAME
 
-# # Install TurtleBot3 Packages
-# ENV ROS_WS=/home/$USERNAME/turtlebot3_ws
-# RUN mkdir -p $ROS_WS/src && cd $ROS_WS/src/ \
-#     && git clone -b humble-devel https://github.com/ROBOTIS-GIT/DynamixelSDK.git \
-#     && git clone -b humble-devel https://github.com/ROBOTIS-GIT/turtlebot3_msgs.git \
-#     && git clone -b humble-devel https://github.com/ROBOTIS-GIT/turtlebot3.git \
-#     && git clone -b humble-devel https://github.com/ROBOTIS-GIT/turtlebot3_simulations.git
+# Install TurtleBot3 Packages
+ENV ROS_WS=/home/$USERNAME/turtlebot3_ws
+RUN mkdir -p $ROS_WS/src && cd $ROS_WS/src/ \
+    && git clone -b humble-devel https://github.com/ROBOTIS-GIT/DynamixelSDK.git \
+    && git clone -b humble-devel https://github.com/ROBOTIS-GIT/turtlebot3_msgs.git \
+    && git clone -b humble-devel https://github.com/ROBOTIS-GIT/turtlebot3.git \
+    && git clone -b humble-devel https://github.com/ROBOTIS-GIT/turtlebot3_simulations.git
 
-# WORKDIR $ROS_WS
-# RUN /bin/bash -c "source /opt/ros/humble/setup.bash && colcon build --symlink-install --parallel-workers 2"
+WORKDIR $ROS_WS
+RUN /bin/bash -c "source /opt/ros/humble/setup.bash && colcon build --symlink-install --parallel-workers 2"
 
-# # Environment Configuration
-# RUN echo 'source ~/turtlebot3_ws/install/setup.bash' >> ~/.bashrc \
-#     && echo 'export ROS_DOMAIN_ID=30 #TURTLEBOT3' >> ~/.bashrc \
-#     && echo 'if [ -f /usr/share/gazebo/setup.sh ]; then source /usr/share/gazebo/setup.sh; fi' >> ~/.bashrc \
-#     && echo 'export TURTLEBOT3_MODEL=burger' >> ~/.bashrc
+# Environment Configuration
+RUN echo 'source ~/turtlebot3_ws/install/setup.bash' >> ~/.bashrc \
+    && echo 'export ROS_DOMAIN_ID=30 #TURTLEBOT3' >> ~/.bashrc \
+    && echo 'if [ -f /usr/share/gazebo/setup.sh ]; then source /usr/share/gazebo/setup.sh; fi' >> ~/.bashrc \
+    && echo 'export TURTLEBOT3_MODEL=burger' >> ~/.bashrc
 
 # Install ArduPilot
 ENV ARDUPILOT_DIR=/home/$USERNAME/ardupilot
